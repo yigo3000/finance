@@ -38,40 +38,66 @@ if __name__ == "__main__":
     vector_check = BooleanVar()
     matrix_check = BooleanVar()
 
-    Label(master, text="ticker").grid(sticky=W)
-    Label(master, text="season").grid(sticky=W)
+    #frames
+    frame_read_db = Frame(master)#关于guid的说明：每个frame下面，grid的row和colunm是重新排的。
+                                 #例如frame_read_db下面的row=0不是master下面的row=0
+    frame_read_db.grid(row=0,rowspan=1,column=0,columnspan=1,sticky=W)
+    #widgets
+    Label(frame_read_db, text="ticker").grid(sticky=W)
+    Label(frame_read_db, text="season").grid(sticky=W)
     default_e1 = StringVar()
     default_e1.set('AAPL')
-    e1 = Entry(master,textvariable=default_e1)
+    e1 = Entry(frame_read_db,textvariable=default_e1)
     default_e2 = StringVar()
     default_e2.set('201703')
-    e2 = Entry(master,textvariable=default_e2)
+    e2 = Entry(frame_read_db,textvariable=default_e2)
     e1.grid(row=0, column=1)
     e2.grid(row=1, column=1)
 
-    checkbutton_0 = Checkbutton(master, text='原始数据', variable=original_check)
+    checkbutton_0 = Checkbutton(frame_read_db, text='原始数据', variable=original_check)
     checkbutton_0.grid(columnspan=2, sticky=W)
-    checkbutton_1 = Checkbutton(master, text='向量数据', variable=vector_check)
+    checkbutton_1 = Checkbutton(frame_read_db, text='向量数据', variable=vector_check)
     checkbutton_1.grid(columnspan=2, sticky=W)
-    checkbutton_2 = Checkbutton(master, text='矩阵数据', variable=matrix_check)
+    checkbutton_2 = Checkbutton(frame_read_db, text='矩阵数据', variable=matrix_check)
     checkbutton_2.grid(columnspan=2, sticky=W)
 
-    button_read = Button(master, text='读取',command=lambda:read_data(e1.get(),e2.get(),(original_check,vector_check,matrix_check)))
+    button_read = Button(frame_read_db, text='开始读取',command=lambda:read_data(e1.get(),e2.get(),(original_check,vector_check,matrix_check)))
     button_read.grid(row=5, column=0)
 
-    wdgt_scrollbar = Scrollbar(master)#滚动条
-    wdgt_scrollbar.grid(row=0,rowspan=10,column=13, columnspan=10)
+    frame_download = Frame(master)
+    frame_download.grid(row=1,rowspan=1,column=0,columnspan=1,sticky=W)
+    checkbutton_3 = Checkbutton(frame_download, text='纽约股市', variable=original_check)
+    checkbutton_3.grid(columnspan=2, sticky=W)
+    checkbutton_4 = Checkbutton(frame_download, text='全美证券交易所', variable=vector_check)
+    checkbutton_4.grid(columnspan=2, sticky=W)
+    checkbutton_5 = Checkbutton(frame_download, text='纳斯达克资本市场', variable=matrix_check)
+    checkbutton_5.grid(columnspan=2, sticky=W)
+    checkbutton_6 = Checkbutton(frame_download, text='纳斯达克全球市场', variable=matrix_check)
+    checkbutton_6.grid(columnspan=2, sticky=W)
+    checkbutton_7 = Checkbutton(frame_download, text='纳斯达克全球精选', variable=matrix_check)
+    checkbutton_7.grid(columnspan=2, sticky=W)
+    checkbutton_8 = Checkbutton(frame_download, text='多伦多股市', variable=matrix_check)
+    checkbutton_8.grid(columnspan=2, sticky=W)
+    checkbutton_9 = Checkbutton(frame_download, text='美国场外柜台交易系统', variable=matrix_check)
+    checkbutton_9.grid(columnspan=2, sticky=W)
+    button2 = Button(frame_download, text='开始下载')
+    button2.grid(row=7, column=0,sticky=W)
+
+    frame_show = Frame(master)
+    frame_show.grid(row=0,rowspan=10,column=14, columnspan=11)
+    wdgt_scrollbar = Scrollbar(frame_show)#滚动条
+    wdgt_scrollbar.set(0.2,1)
+    wdgt_scrollbar.grid(row=0,rowspan=10,column=13, columnspan=1,sticky=E)
     var_1=StringVar()
     global wdgt_show
-    wdgt_show = Text(master,width=150,height=40,yscrollcommand =wdgt_scrollbar.set)
-    wdgt_show.grid(row=0,column=3,rowspan=10, columnspan=10)
+    wdgt_show = Text(frame_show,width=150,height=40,yscrollcommand =wdgt_scrollbar.set)
+    wdgt_show.grid(row=0,column=0,rowspan=10, columnspan=10)
     #wdgt_show.place(bordermode=OUTSIDE,x=0,y=200)
     wdgt_scrollbar.config( command = wdgt_show.yview )
 
 
 
-    button2 = Button(master, text='Zoom out')
-    button2.grid(row=6, column=0)
+    
 
     mainloop()
 
