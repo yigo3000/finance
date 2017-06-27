@@ -6,6 +6,15 @@
 '''
 from tkinter import *
 from input_data import  *
+from load_from_ms import *
+import time
+import threading
+SHOW_TIME = True
+def show_time():
+    global wdgt_show
+
+    wdgt_show.insert(END, time.strftime("\n%H:%M:%S\n", time.localtime()),'time' )
+    #wdgt_show.tag_add("time", "1.0", "1.32")
 def read_data(ticker, season, type):
     '''
     ticker:
@@ -20,16 +29,36 @@ def read_data(ticker, season, type):
     if(type[0].get()):
         global original_data
         original_data = input_data_db(conn, ticker, season).get_data_origin()
-        wdgt_show.insert(END, 'Originnal data:\n',)
-        wdgt_show.insert(END, original_data)
+        if(SHOW_TIME==True):
+            show_time()
+        wdgt_show.insert(END, 'Originnal data:\n','title')
+        for tmp in original_data:
+            wdgt_show.insert(END, str(tmp)+" "*(50-len(str(tmp)))+ str(original_data[tmp]) +'\n','data')
     if(type[1].get()):
         global vector_data
         vector_data = input_data_db(conn, ticker, season).get_data_vector()
-        wdgt_show.insert(END, vector_data)
+        if(SHOW_TIME==True):
+            show_time()
+        wdgt_show.insert(END, 'Vector data:\n','title')
+        wdgt_show.insert(END, vector_data,'data')
     if(type[2].get()):
         global matrix_data
         matrix_data = input_data_db(conn, ticker, season).get_data_matrix()
-        wdgt_show.insert(END, matrix_data)
+        if(SHOW_TIME==True):
+            show_time()
+        wdgt_show.insert(END, 'Matrix data:\n','title')
+        wdgt_show.insert(END, matrix_data,'data')
+def download_data(*type):
+    #type: 想要下载的股票所处的交易所,是一个tuple，内部是boolen变量。
+    # 例如：（True,False,False,False,False,False,False）,表示：只下载纽约股市。
+    conn = pymysql.connect(**pymysql_config)
+    exchanges = ('NYQ','ASE','NCM','NGM','NMS','PNK','OBB')
+    download_thread=[None]*len(exchanges)
+    for i in range(len(type)):
+        if(type[i].get() is True):
+            download_thread[i] = threading.Thread(target=load_from_ms,args=(conn,exchanges[i],True,wdgt_show))
+            download_thread[i].start()
+            #load_from_ms(conn,exchanges[i],GUI=True,text_handle=wdgt_show)
 if __name__ == "__main__":
     #创建界面
     master = Tk()
@@ -37,7 +66,14 @@ if __name__ == "__main__":
     original_check = BooleanVar()
     vector_check = BooleanVar()
     matrix_check = BooleanVar()
-
+    xiabain_check_0= BooleanVar()
+    xiabain_check_1= BooleanVar()
+    xiabain_check_2= BooleanVar()
+    xiabain_check_3= BooleanVar()
+    xiabain_check_4= BooleanVar()
+    xiabain_check_5= BooleanVar()
+    xiabain_check_6= BooleanVar()
+    xiabain_check_7= BooleanVar()
     #frames
     frame_read_db = Frame(master)#关于guid的说明：每个frame下面，grid的row和colunm是重新排的。
                                  #例如frame_read_db下面的row=0不是master下面的row=0
@@ -66,32 +102,35 @@ if __name__ == "__main__":
 
     frame_download = Frame(master)
     frame_download.grid(row=1,rowspan=1,column=0,columnspan=1,sticky=W)
-    checkbutton_3 = Checkbutton(frame_download, text='纽约股市', variable=original_check)
+    checkbutton_3 = Checkbutton(frame_download, text='纽约股市', variable=xiabain_check_0)
     checkbutton_3.grid(columnspan=2, sticky=W)
-    checkbutton_4 = Checkbutton(frame_download, text='全美证券交易所', variable=vector_check)
+    checkbutton_4 = Checkbutton(frame_download, text='全美证券交易所', variable=xiabain_check_1)
     checkbutton_4.grid(columnspan=2, sticky=W)
-    checkbutton_5 = Checkbutton(frame_download, text='纳斯达克资本市场', variable=matrix_check)
+    checkbutton_5 = Checkbutton(frame_download, text='纳斯达克资本市场', variable=xiabain_check_2)
     checkbutton_5.grid(columnspan=2, sticky=W)
-    checkbutton_6 = Checkbutton(frame_download, text='纳斯达克全球市场', variable=matrix_check)
+    checkbutton_6 = Checkbutton(frame_download, text='纳斯达克全球市场', variable=xiabain_check_3)
     checkbutton_6.grid(columnspan=2, sticky=W)
-    checkbutton_7 = Checkbutton(frame_download, text='纳斯达克全球精选', variable=matrix_check)
+    checkbutton_7 = Checkbutton(frame_download, text='纳斯达克全球精选', variable=xiabain_check_4)
     checkbutton_7.grid(columnspan=2, sticky=W)
-    checkbutton_8 = Checkbutton(frame_download, text='多伦多股市', variable=matrix_check)
+    checkbutton_8 = Checkbutton(frame_download, text='多伦多股市', variable=xiabain_check_5)
     checkbutton_8.grid(columnspan=2, sticky=W)
-    checkbutton_9 = Checkbutton(frame_download, text='美国场外柜台交易系统', variable=matrix_check)
+    checkbutton_9 = Checkbutton(frame_download, text='美国场外柜台交易系统', variable=xiabain_check_6)
     checkbutton_9.grid(columnspan=2, sticky=W)
-    button2 = Button(frame_download, text='开始下载')
-    button2.grid(row=7, column=0,sticky=W)
+    button_download = Button(frame_download, text='开始下载',command=lambda:download_data(xiabain_check_0,xiabain_check_1,xiabain_check_2,xiabain_check_3,xiabain_check_4,xiabain_check_5,xiabain_check_6))
+    button_download.grid(row=7, column=0,sticky=W)
 
     frame_show = Frame(master)
-    frame_show.grid(row=0,rowspan=10,column=14, columnspan=11)
+    frame_show.grid(row=0,rowspan=2,column=1, columnspan=1)
     wdgt_scrollbar = Scrollbar(frame_show)#滚动条
-    wdgt_scrollbar.set(0.2,1)
-    wdgt_scrollbar.grid(row=0,rowspan=10,column=13, columnspan=1,sticky=E)
+    wdgt_scrollbar.set(0.5,1)
+    wdgt_scrollbar.grid(row=0,column=1,sticky='ns')
     var_1=StringVar()
     global wdgt_show
     wdgt_show = Text(frame_show,width=150,height=40,yscrollcommand =wdgt_scrollbar.set)
-    wdgt_show.grid(row=0,column=0,rowspan=10, columnspan=10)
+    wdgt_show.grid(row=0,column=0,rowspan=1, columnspan=1)
+    wdgt_show.tag_config("title", background="white", foreground="black")
+    wdgt_show.tag_config("time", background="white", foreground="red")
+    wdgt_show.tag_config("data", background="white", foreground="blue")
     #wdgt_show.place(bordermode=OUTSIDE,x=0,y=200)
     wdgt_scrollbar.config( command = wdgt_show.yview )
 
